@@ -5,10 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Simplex JS feladat 2</title>
     <script type="text/javascript" src="jquery-3.7.1.js"></script>
-    <link href="bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap-5.3.3-dist/css/bootstrap.css" rel="stylesheet">
 </head>
 <body>
-    <h1>test</h1>
-    <script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+    <h1 class="text-center mb-5">Time table planner</h1>
+    <h2 class="text-center mb-5">Usage: Drag subject to the desired time.</h2>
+    <div class = "row">
+        <div class = "col-2 mx-auto">
+            <h2 class="text-center mb-4">Subjects</h2>
+            <table class="table table-primary table-bordered table-bordered">
+                <thead>
+                    <tr>
+                        <th scope = "col" class = "text-center col-1">Duration</th>
+                        <th scope = "col" class = "text-center">Subject</th>
+                    </tr>
+                </thead>
+                <tbody id = "subjects_table_body">
+                </tbody>
+            </table>
+        </div>
+        <div class = "col-9 mx-auto">
+            <h2 class="text-center mb-4">Time table</h2>
+            <table class="table table-primary table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col" class="col-1 text-center">Time</th>
+                        <th scope="col" class="col-2 text-center">Monday</th>
+                        <th scope="col" class="col-2 text-center">Tuesday</th>
+                        <th scope="col" class="col-2 text-center">Wednesday</th>
+                        <th scope="col" class="col-2 text-center">Thursday</th>
+                        <th scope="col" class="col-2 text-center">Friday</th>
+                    </tr>
+                </thead>
+                <tbody id = "time_table_body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript" src="bootstrap-5.3.3-dist/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="main.js"></script>
 </body>
 </html>
