@@ -24,6 +24,16 @@ function minutes_to_string(t) {
 }
 
 
+function on_time_table_drag_end(e) {
+    const o_row_i = e.dataTransfer.getData("o_row_i");
+    const o_col_i = e.dataTransfer.getData("o_col_i");
+
+    if(o_row_i != "") {
+        $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1].textContent = "";
+    }
+}
+
+
 function add_subject(s_row_i, s_col_i, subject) {
     const subject_rows = subjects_rows[subject];
 
@@ -57,6 +67,7 @@ function add_subject(s_row_i, s_col_i, subject) {
     cell.setAttribute("class", "draggable");
     cell.setAttribute("draggable", "true");
     cell.setAttribute("ondragstart", "on_time_table_drag_start(event)");
+    cell.setAttribute("ondragend", "on_time_table_drag_end(event)");
 
     for(let row_i = s_row_i + 1; row_i < s_row_i + subject_rows; ++row_i) {
         table.children[row_i].children[s_col_i + 1].setAttribute("class", "d-none");
@@ -104,13 +115,6 @@ function on_time_table_drag_start(e) {
 
 function on_drop(e) {
     e.preventDefault();
-
-    const o_row_i = e.dataTransfer.getData("o_row_i");
-    const o_col_i = e.dataTransfer.getData("o_col_i");
-
-    if(o_row_i != "") {
-        $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1].textContent = "";
-    }
 
     const s_row_i = Number(e.target.parentElement.attributes.row_i.value);
     const s_col_i = Number(e.target.attributes.col_i.value);
