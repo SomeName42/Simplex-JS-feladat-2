@@ -29,7 +29,11 @@ function on_time_table_drag_end(e) {
     const o_col_i = e.dataTransfer.getData("o_col_i");
 
     if(o_row_i != "") {
-        $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1].textContent = "";
+        const cell = $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1];
+
+        if(cell.attributes.class.value == "") {
+            cell.textContent = "";
+        }
     }
 }
 
@@ -115,6 +119,13 @@ function on_time_table_drag_start(e) {
 
 function on_drop(e) {
     e.preventDefault();
+
+    const o_row_i = e.dataTransfer.getData("o_row_i");
+    const o_col_i = e.dataTransfer.getData("o_col_i");
+
+    if(o_row_i != "") {
+        $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1].textContent = "";
+    }
 
     const s_row_i = Number(e.target.parentElement.attributes.row_i.value);
     const s_col_i = Number(e.target.attributes.col_i.value);
