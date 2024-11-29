@@ -64,12 +64,15 @@ function add_subject(s_row_i, s_col_i, subject) {
 }
 
 
-function remove_subject(s_row_i, s_col_i) {
+function remove_subject(s_row_i, s_col_i, dragging) {
     const table = $("#time_table_body")[0];
     const cell = table.children[s_row_i].children[s_col_i + 1];
     const subject_rows = subjects_rows[cell.textContent];
 
-    cell.textContent = "";
+    if(!dragging) {
+        cell.textContent = "";
+    }
+
     cell.setAttribute("rowspan", "");
     cell.setAttribute("class", "");
     cell.setAttribute("draggable", "");
@@ -88,17 +91,26 @@ function on_subjects_drag_start(e) {
 
 function on_time_table_drag_start(e) {
     e.dataTransfer.setData("text", e.originalTarget.innerText);
-
     const s_row_i = Number(e.target.parentElement.attributes.row_i.value);
     const s_col_i = Number(e.target.attributes.col_i.value);
 
-    remove_subject(s_row_i, s_col_i);
+    e.dataTransfer.setData("o_row_i", s_row_i);
+    e.dataTransfer.setData("o_col_i", s_col_i);
+
+    remove_subject(s_row_i, s_col_i, true);
 }
 
 
 
 function on_drop(e) {
     e.preventDefault();
+
+    const o_row_i = e.dataTransfer.getData("o_row_i");
+    const o_col_i = e.dataTransfer.getData("o_col_i");
+
+    if(o_row_i != "") {
+        $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1].textContent = "";
+    }
 
     const s_row_i = Number(e.target.parentElement.attributes.row_i.value);
     const s_col_i = Number(e.target.attributes.col_i.value);
