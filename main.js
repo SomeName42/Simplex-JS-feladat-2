@@ -34,17 +34,20 @@ function add_subject(s_row_i, s_col_i, subject) {
     const table = $("#time_table_body")[0];
 
     if(table.children.length < s_row_i + subject_rows) {
+        $("#drag_error_too_long").toast("show");
         return;
     }
 
     const cell = table.children[s_row_i].children[s_col_i + 1];
 
     if(cell.textContent != "") {
+        $("#drag_error_occupied").toast("show");
         return;
     }
 
     for(let row_i = s_row_i + 1; row_i < s_row_i + subject_rows; ++row_i) {
         if(table.children[row_i].children[s_col_i + 1].textContent != "") {
+            $("#drag_error_occupied").toast("show");
             return;
         }
     }
@@ -102,6 +105,7 @@ function on_drop(e) {
     const subject = e.dataTransfer.getData("text");
 
     add_subject(s_row_i, s_col_i, subject);
+    $("#drag_success").toast("show");
 }
 
 
@@ -114,6 +118,7 @@ function on_save_click() {
     const save_name = $("#save_name").val();
 
     if(save_name == "") {
+        $("#save_error_empty").toast("show");
         return;
     }
 
@@ -143,6 +148,8 @@ function on_save_click() {
     }
 
     saves[save_name] = save;
+
+    $("#save_success").toast("show");
 }
 
 
