@@ -41,6 +41,12 @@ function add_subject(s_row_i, s_col_i, subject) {
         return;
     }
 
+    for(let row_i = s_row_i + 1; row_i < s_row_i + subject_rows; ++row_i) {
+        if(table.children[row_i].children[s_col_i].textContent != "") {
+            return;
+        }
+    }
+
     cell.textContent = subject;
     cell.setAttribute("rowspan", subject_rows);
     cell.setAttribute("class", "draggable");
