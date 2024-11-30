@@ -31,8 +31,9 @@ function on_time_table_drag_end(e) {
     if(o_row_i != "") {
         const cell = $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1];
 
-        if(cell.attributes.class.value == "") {
-            cell.textContent = "";
+        if(cell.attributes.remove_after_dragging.value != "") {
+            cell.innerHTML = "";
+            cell.setAttribute("remove_after_dragging", "");
         }
     }
 }
@@ -41,57 +42,54 @@ function on_time_table_drag_end(e) {
 function add_subject(s_row_i, s_col_i, subject) {
     const subject_rows = subjects_rows[subject];
 
-    if(subject_rows === undefined) {
-        return;
+    if(subject_rows == undefined) {
+        return false;
     }
 
     const table = $("#time_table_body")[0];
 
     if(table.children.length < s_row_i + subject_rows) {
         $("#drag_error_too_long").toast("show");
-        return;
+        return false;
     }
 
     const cell = table.children[s_row_i].children[s_col_i + 1];
 
-    if(cell.textContent != "") {
+    if(cell.innerHTML != "") {
         $("#drag_error_occupied").toast("show");
-        return;
+        return false;
     }
 
     for(let row_i = s_row_i + 1; row_i < s_row_i + subject_rows; ++row_i) {
-        if(table.children[row_i].children[s_col_i + 1].textContent != "") {
+        if(table.children[row_i].children[s_col_i + 1].innerHTML != "") {
             $("#drag_error_occupied").toast("show");
-            return;
+            return false;
         }
     }
 
-    cell.textContent = subject;
+    cell.innerHTML = `<div class = "btn btn-primary draggable" draggable="true" ondragstart = "on_time_table_drag_start(event)" ondragend = "on_time_table_drag_end(event)" ondrop="on_drop(event)" ondragover="on_drag_over(event)">${subject}</div>`;
     cell.setAttribute("rowspan", subject_rows);
-    cell.setAttribute("class", "draggable");
-    cell.setAttribute("draggable", "true");
-    cell.setAttribute("ondragstart", "on_time_table_drag_start(event)");
-    cell.setAttribute("ondragend", "on_time_table_drag_end(event)");
 
     for(let row_i = s_row_i + 1; row_i < s_row_i + subject_rows; ++row_i) {
         table.children[row_i].children[s_col_i + 1].setAttribute("class", "d-none");
     }
+
+    return true;
 }
 
 
 function remove_subject(s_row_i, s_col_i, dragging) {
     const table = $("#time_table_body")[0];
     const cell = table.children[s_row_i].children[s_col_i + 1];
-    const subject_rows = subjects_rows[cell.textContent];
+    const subject_rows = subjects_rows[cell.children[0].textContent];
 
     if(!dragging) {
-        cell.textContent = "";
+        cell.innerHTML = "";
+    } else {
+        cell.setAttribute("remove_after_dragging", "true");
     }
 
     cell.setAttribute("rowspan", "");
-    cell.setAttribute("class", "");
-    cell.setAttribute("draggable", "");
-    cell.setAttribute("ondragstart", "");
 
     for(let row_i = s_row_i + 1; row_i < s_row_i + subject_rows; ++row_i) {
         table.children[row_i].children[s_col_i + 1].setAttribute("class", "");
@@ -106,8 +104,8 @@ function on_subjects_drag_start(e) {
 
 function on_time_table_drag_start(e) {
     e.dataTransfer.setData("text", e.originalTarget.innerText);
-    const s_row_i = Number(e.target.parentElement.attributes.row_i.value);
-    const s_col_i = Number(e.target.attributes.col_i.value);
+    const s_row_i = Number(e.target.parentElement.parentElement.attributes.row_i.value);
+    const s_col_i = Number(e.target.parentElement.attributes.col_i.value);
 
     e.dataTransfer.setData("o_row_i", s_row_i);
     e.dataTransfer.setData("o_col_i", s_col_i);
@@ -120,19 +118,38 @@ function on_time_table_drag_start(e) {
 function on_drop(e) {
     e.preventDefault();
 
-    const o_row_i = e.dataTransfer.getData("o_row_i");
-    const o_col_i = e.dataTransfer.getData("o_col_i");
+    let cell;
 
-    if(o_row_i != "") {
-        $("#time_table_body")[0].children[Number(o_row_i)].children[Number(o_col_i) + 1].textContent = "";
+    if(e.target.localName == "td") {
+        cell = e.target;
+    } else {
+        cell = e.target.parentElement;
     }
 
-    const s_row_i = Number(e.target.parentElement.attributes.row_i.value);
-    const s_col_i = Number(e.target.attributes.col_i.value);
+    if(cell === null) {
+        return;
+    }
+
+    let o_row_i = e.dataTransfer.getData("o_row_i");
+    let o_col_i = e.dataTransfer.getData("o_col_i");
+
+    if(o_row_i != "") {
+        o_row_i = Number(o_row_i);
+        o_col_i = Number(o_col_i);
+        const cell = $("#time_table_body")[0].children[o_row_i].children[o_col_i + 1];
+        cell.innerHTML = "";
+        cell.setAttribute("remove_after_dragging", "");
+    }
+
+    const s_row_i = Number(cell.parentElement.attributes.row_i.value);
+    const s_col_i = Number(cell.attributes.col_i.value);
     const subject = e.dataTransfer.getData("text");
 
-    add_subject(s_row_i, s_col_i, subject);
-    $("#drag_success").toast("show");
+    if(add_subject(s_row_i, s_col_i, subject)) {
+        $("#drag_success").toast("show");
+    } else if(o_row_i !== "") {
+        add_subject(o_row_i, o_col_i, subject);
+    }
 }
 
 
@@ -151,7 +168,10 @@ function on_save_click() {
 
     const load_select = $("#load_select");
 
-    load_select.append($(`<option>${save_name}</option>`));
+    if(saves[save_name] == undefined) {
+        load_select.append($(`<option>${save_name}</option>`));
+    }
+
     load_select.prop("disabled", false);
 
     $("#load_button").prop("disabled", false);
@@ -166,10 +186,10 @@ function on_save_click() {
         const row = table.children[row_i].children;
 
         for(let col_i = 0; col_i < 5; ++col_i) {
-            const subject = row[col_i + 1].textContent;
+            const children = row[col_i + 1].children;
 
-            if(subject != "") {
-                save.push([row_i, col_i, subject]);
+            if(children.length > 0) {
+                save.push([row_i, col_i, children[0].textContent]);
             }
         }
     }
@@ -224,7 +244,7 @@ $(document).ready(function() {
     for(let t = start_h * 60; t < end_h * 60; t += cell_size) {
         const row = $(`<tr class="text-center" row_i=${(t - start_h * 60) / cell_size}></tr>`);
 
-        row.append(`<th scope="col">${minutes_to_string(t)}</th>`);
+        row.append(`<th scope="col" class = "py-3">${minutes_to_string(t)}</th>`);
 
         for(let d = 0; d < 5; ++d) {
             row.append(`<td ondrop="on_drop(event)" ondragover="on_drag_over(event)" col_i=${d}></td>`);
@@ -235,7 +255,7 @@ $(document).ready(function() {
 
     subjects.forEach((subject) => {
         subjects_rows[subject[0]] = subject[1] / cell_size;
-        $("#subjects_table_body").append(`<tr class = "text-center align-middle"><td>${minutes_to_string(subject[1])}</td><td draggable="true" class = "draggable" ondragstart="on_subjects_drag_start(event)">${subject[0]}</td></tr>`);
+        $("#subjects_table_body").append(`<tr class = "text-center align-middle"><td>${minutes_to_string(subject[1])}</td><td><div draggable="true" class = "draggable btn btn-primary" ondragstart="on_subjects_drag_start(event)">${subject[0]}</div></td></tr>`);
     })
 
     $("#save_button").click(on_save_click);
