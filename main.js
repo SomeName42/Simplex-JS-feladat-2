@@ -98,12 +98,12 @@ function remove_subject(s_row_i, s_col_i, dragging) {
 
 
 function on_subjects_drag_start(e) {
-    e.dataTransfer.setData("text", e.originalTarget.innerText);
+    e.dataTransfer.setData("text", e.target.innerText);
 }
 
 
 function on_time_table_drag_start(e) {
-    e.dataTransfer.setData("text", e.originalTarget.innerText);
+    e.dataTransfer.setData("text", e.target.innerText);
     const s_row_i = Number(e.target.parentElement.parentElement.attributes.row_i.value);
     const s_col_i = Number(e.target.parentElement.attributes.col_i.value);
 
